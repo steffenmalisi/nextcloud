@@ -1,0 +1,11 @@
+[Unit]
+Description=Mount unit for /var/nextcloud_data
+
+[Mount]
+What=/dev/disk/by-label/backup1
+Where=/var/nextcloud_data
+Type=btrfs
+Options=rw
+
+[Install]
+WantedBy=multi-user.target

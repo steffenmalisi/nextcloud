@@ -1,0 +1,109 @@
+#!/bin/bash
+
+set -e
+
+## Wait for network
+# combustion: network
+
+## Redirect output to the console
+exec > >(exec tee -a /dev/tty0) 2>&1
+
+## Source env variables
+source .env
+
+## Set hostname
+echo "$SYSTEM_HOST_NAME" > /etc/hostname
+echo "COMBUSTION-INIT: hostname $SYSTEM_HOST_NAME set"
+
+## Mounts
+mount /home
+mount /var
+echo "COMBUSTION-INIT: /home /var mounted"
+
+## Disable IPv6
+cp 90-disableipv6.conf /etc/sysctl.d/
+echo "COMBUSTION-INIT: IPv6 disabled"
+
+## Install nfs-kernel-server
+zypper --non-interactive install nfs-kernel-server
+systemctl enable rpcbind.service
+systemctl enable nfs-server.service
+echo "COMBUSTION-INIT: NFS enabled"
+
+## Configure nfs
+mkdir -p /var/share
+chown nobody:nogroup /var/share
+chmod 777 /var/share
+echo "/var/share $NFS_SHARE_CIDR(rw,sync,no_subtree_check)" >> /etc/exports
+exportfs -a
+echo "COMBUSTION-INIT: NFS configured"
+
+## Enable nextlcoud_data mount
+mkdir -p /var/nextcloud_data
+cp var-nextcloud_data.mount /etc/systemd/system/
+systemctl enable var-nextcloud_data.mount
+echo "COMBUSTION-INIT: Nextcloud data mount enabled"
+
+## Remove podman and use docker instead
+#zypper --non-interactive remove podman
+#echo "COMBUSTION-INIT: Podman removed"
+#zypper --non-interactive install docker
+#zypper --non-interactive install docker-compose
+#sed -i 's|DOCKER_OPTS=.*|DOCKER_OPTS="--selinux-enabled"|' /etc/sysconfig/docker # Enable SE Linux
+#systemctl enable docker
+#echo "COMBUSTION-INIT: Docker enabled"
+
+## Install node_exporter
+zypper --non-interactive install golang-github-prometheus-node_exporter
+systemctl enable prometheus-node_exporter
+echo "COMBUSTION-INIT: Node-exporter enabled"
+
+## Install cadvisor
+zypper --non-interactive install cadvisor
+systemctl enable cadvisor
+echo "COMBUSTION-INIT: CAdvisor enabled"
+
+## Prepare container config
+mkdir -p /var/nextcloud_container_config
+cp -r config/* /var/nextcloud_container_config/
+echo "COMBUSTION-INIT: /var/nextcloud_container_config/ created"
+
+## Add SSH access for root user
+# shellcheck disable=SC2174 # intended to set permissions only on the deepest directory
+mkdir -pm700 /root/.ssh
+cat id_rsa.pub > /root/.ssh/authorized_keys
+echo "COMBUSTION-INIT: root SSH authorized_keys set"
+
+## Add a new sudo user with SSH access
+useradd -m "$SYSTEM_USER_NAME"
+echo "$SYSTEM_USER_NAME ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$SYSTEM_USER_NAME"
+# shellcheck disable=SC2174 # intended to set permissions only on the deepest directory
+mkdir -pm700 "/home/$SYSTEM_USER_NAME/.ssh"
+chown "$SYSTEM_USER_NAME:users" -R "/home/$SYSTEM_USER_NAME/.ssh"
+cat id_rsa.pub > "/home/$SYSTEM_USER_NAME/.ssh/authorized_keys"
+echo "COMBUSTION-INIT: $SYSTEM_USER_NAME SSH authorized_keys set"
+
+## Add a new docker user with SSH access
+#useradd -m dkr
+#mkdir -pm700 /home/dkr/.ssh
+#chown dkr:users -R /home/dkr/.ssh
+#cat id_rsa.pub > /home/dkr/.ssh/authorized_keys
+#usermod -a -G docker dkr
+#echo "COMBUSTION-INIT: dkr SSH authorized_keys set"
+
+## Enable sshd
+systemctl enable sshd.service
+echo "COMBUSTION-INIT: SSH enabled"
+
+## Reboot after setup
+cp firstbootreboot.service /etc/systemd/system/
+systemctl enable firstbootreboot.service
+echo "COMBUSTION-INIT: firstbootreboot service enabled"
+
+## Clear up mounts
+umount /home
+umount /var
+echo "COMBUSTION-INIT: /home /var unmounted"
+
+## Leave a marker
+echo "Configured with combustion" > /etc/issue.d/combustion
