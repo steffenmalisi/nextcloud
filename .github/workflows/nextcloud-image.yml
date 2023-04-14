@@ -9,6 +9,7 @@ on:
     branches: [ "main" ]
     paths:
       - "images/nextcloud/**"
+  workflow_dispatch:
       
 env:
   IMAGE_NAME: "nextcloud"
