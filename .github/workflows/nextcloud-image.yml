@@ -1,0 +1,26 @@
+name: Nextcloud Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "images/nextcloud/**"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "images/nextcloud/**"
+      
+env:
+  IMAGE_NAME: "nextcloud"
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: |
+        cd images/nextcloud
+        docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:$(date +%s)
