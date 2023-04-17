@@ -1,4 +1,4 @@
-name: Nextcloud Image CI
+name: Build Nextcloud Image
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     paths:
       - "images/nextcloud/**"
   workflow_dispatch:
-      
+
 env:
   IMAGE_NAME: "nextcloud"
 jobs:
