@@ -54,7 +54,7 @@ if ! [ -f "$NEXTCLOUD_DATA_DIR/mal1s1-nc.install.done" ]; then
     php /var/www/html/occ config:system:delete enabledPreviewProviders
     php /var/www/html/occ config:system:set enabledPreviewProviders 0 --value="OC\\Preview\\Imaginary"
     php /var/www/html/occ config:system:set enabledPreviewProviders 1 --value="OC\\Preview\\Movie"
-    php /var/www/html/occ config:system:set preview_imaginary_url --value="http://$IMAGINARY_HOST:9000"
+    php /var/www/html/occ config:system:set preview_imaginary_url --value="http://$IMAGINARY_HOST"
   fi
 
   # notify_push
