@@ -1,0 +1,7 @@
+https://{$SERVER_DOMAIN}:3001 {
+        reverse_proxy localhost:3000
+}
+
+https://{$SERVER_DOMAIN}:9091 {
+        reverse_proxy localhost:9090
+}
