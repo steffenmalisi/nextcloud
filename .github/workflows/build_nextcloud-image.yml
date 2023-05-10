@@ -1,10 +1,6 @@
 name: Build Nextcloud Image
 
 on:
-  push:
-    branches: [ "main" ]
-    paths:
-      - "images/nextcloud/**"
   pull_request:
     branches: [ "main" ]
     paths:
