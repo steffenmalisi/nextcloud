@@ -17,3 +17,5 @@ if [ "$DATA_DIR_PERMISSION" != "750:www-data:root" ]; then
     chown -R www-data:root "$NEXTCLOUD_DATA_DIR"
     chmod 750 -R "$NEXTCLOUD_DATA_DIR"
 fi
+
+echo "Sanity checks ok"
