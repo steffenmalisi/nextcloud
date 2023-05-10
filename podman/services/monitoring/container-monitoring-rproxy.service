@@ -28,7 +28,8 @@ ExecStart=/usr/bin/podman run \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	--volume ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z \
 	--volume mon_rproxy_data:/data \
-	--volume mon_rproxy_config:/config docker.io/caddy:alpine
+	--volume mon_rproxy_config:/config \
+  docker.io/caddy:alpine
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \
 	--cidfile=%t/%n.ctr-id

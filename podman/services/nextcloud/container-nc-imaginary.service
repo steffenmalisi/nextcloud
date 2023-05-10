@@ -27,7 +27,7 @@ ExecStart=/usr/bin/podman run \
 	--name=nc-imaginary \
 	-e TZ=${TIMEZONE} \
 	-e PORT=9001 \
-  docker.io/nextcloud/aio-imaginary
+  docker.io/nextcloud/aio-imaginary:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \
 	--cidfile=%t/%n.ctr-id

@@ -27,7 +27,7 @@ ExecStart=/usr/bin/podman run \
 	--name=monitoring-prom \
 	--volume prometheus:/data \
 	--volume ${CONFIG_DIR}/prometheus:/etc/prometheus:Z \
-  docker.io/prom/prometheus
+  docker.io/prom/prometheus:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \
 	--cidfile=%t/%n.ctr-id
