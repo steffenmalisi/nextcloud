@@ -1,0 +1,52 @@
+{
+        servers :443 {
+                metrics
+        }
+}
+
+:9999 {
+        metrics /metrics
+}
+
+https://{$SERVER_DOMAIN}:443 {
+        redir /.well-known/carddav /remote.php/dav 301
+        redir /.well-known/caldav /remote.php/dav 301
+
+        header {
+                # enable HSTS
+                Strict-Transport-Security max-age=31536000;
+        }
+
+        route /push/* {
+                uri strip_prefix /push
+                reverse_proxy http://nc:7867
+        }
+
+        # .htaccess / data / config / ... shouldn't be accessible from outside
+        @forbidden {
+                path /.htaccess
+                path /data/*
+                path /config/*
+                path /db_structure
+                path /.xml
+                path /README
+                path /3rdparty/*
+                path /lib/*
+                path /templates/*
+                path /occ
+                path /console.php
+        }
+        respond @forbidden 404
+
+        root * /var/www/html
+        php_fastcgi nc:9000
+        file_server
+}
+
+https://{$SERVER_DOMAIN}:3000 {
+        reverse_proxy grafana:3000
+}
+
+https://{$SERVER_DOMAIN}:9090 {
+        reverse_proxy prometheus:9090
+}

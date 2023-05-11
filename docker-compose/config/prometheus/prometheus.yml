@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    instance: monitoring
+scrape_configs:
+  - job_name: 'caddy'
+    static_configs:
+      - targets: ['caddy:9999']
+  - job_name: 'nextcloud'
+    static_configs:
+      - targets: ['nc-exporter:9205']
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['host.docker.internal:4194']
+  - job_name: 'node'
+    static_configs:
+      - targets: ['host.docker.internal:9100']

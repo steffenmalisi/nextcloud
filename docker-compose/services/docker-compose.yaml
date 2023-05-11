@@ -1,0 +1,154 @@
+version: "3.8"
+
+services:
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    container_name: caddy
+    ports:
+      - 443:443    #nextcloud
+      - 80:80      #nextcloud
+      - 3000:3000  #grafana
+      - 9090:9090  #prometheus
+    volumes:
+      - ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z
+      - caddy_data:/data
+      - caddy_config:/config
+      - nc:/var/www/html:ro
+    environment:
+      - SERVER_DOMAIN=${SERVER_DOMAIN}
+    networks:
+      - nc
+
+  nc-db:
+    image: nextcloud/aio-postgresql
+    container_name: nc-db
+    volumes:
+      - nc-db:/var/lib/postgresql/data:rw
+      - nc-db_dump:/mnt/data:rw
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - TZ=${TIMEZONE}
+      - PGTZ=${TIMEZONE}
+    stop_grace_period: 1800s
+    restart: unless-stopped
+    networks:
+      - nc
+
+  nc-redis:
+    image: nextcloud/aio-redis
+    container_name: nc-redis
+    environment:
+      - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
+      - TZ=${TIMEZONE}
+    volumes:
+      - nc-redis:/data:rw
+    restart: unless-stopped
+    networks:
+      - nc
+
+  nc-imaginary:
+    image: nextcloud/aio-imaginary
+    container_name: nc-imaginary
+    environment:
+      - TZ=${TIMEZONE}
+    restart: unless-stopped
+    networks:
+      - nc
+
+  nc:
+    depends_on:
+      - nc-db
+      - nc-redis
+      - nc-imaginary
+    build: ../../images/nextcloud
+    container_name: nc
+    volumes:
+      - nc:/var/www/html:rw
+      - ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:Z
+      - type: tmpfs # as per recommendation of https://github.com/nextcloud/recognize#tmp
+        target: /tmp
+    environment:
+      - POSTGRES_HOST=nc-db
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - NEXTCLOUD_DATA_DIR=/mnt/ncdata
+      - NEXTCLOUD_TRUSTED_DOMAINS=${SERVER_DOMAIN}
+      - OVERWRITECLIURL=https://${SERVER_DOMAIN}/
+      - TRUSTED_PROXIES=127.0.0.1
+      - REDIS_HOST=nc-redis
+      - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
+      - PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT}
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT}
+      - IMAGINARY_HOST=nc-imaginary # Custom, used to setup imaginary
+      - SERVER_DOMAIN=${SERVER_DOMAIN} # Custom, used for notify_push
+      - NEXTCLOUD_SERVERINFO_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} # Custom, used to set token for nextcloud-exporter
+    restart: unless-stopped
+    networks:
+      - nc
+
+  nc-exporter:
+    depends_on:
+      - caddy
+      - nc
+    image: xperimental/nextcloud-exporter
+    restart: unless-stopped
+    container_name: nc-exporter
+    environment:
+      - NEXTCLOUD_SERVER=https://${SERVER_DOMAIN}
+      - NEXTCLOUD_LISTEN_ADDRESS=:9205
+      - NEXTCLOUD_TIMEOUT=5s
+      - NEXTCLOUD_AUTH_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN}
+      - NEXTCLOUD_TLS_SKIP_VERIFY=true
+    networks:
+      - nc
+    extra_hosts:
+      - "${SERVER_DOMAIN}:host-gateway" # Just in case a non public domain is used
+
+  prometheus:
+    depends_on:
+      - caddy
+      - nc-exporter
+    image: prom/prometheus
+    restart: unless-stopped
+    container_name: prometheus
+    volumes:
+      - prometheus:/data
+      - ${CONFIG_DIR}/prometheus:/etc/prometheus:Z
+    networks:
+      - nc
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    depends_on:
+      - prometheus
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - grafana:/var/lib/grafana
+      - ${CONFIG_DIR}/grafana:/etc/grafana:Z
+    networks:
+      - nc
+
+volumes:
+  nc-apache:
+  nc-db:
+  nc-db_dump:
+  nc:
+  nc-redis:
+  caddy_data:
+  caddy_config:
+  prometheus:
+  grafana:
+
+networks:
+  nc:
