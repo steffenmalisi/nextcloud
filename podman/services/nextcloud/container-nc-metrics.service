@@ -14,7 +14,7 @@ After=pod-nc.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/nextcloud
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \

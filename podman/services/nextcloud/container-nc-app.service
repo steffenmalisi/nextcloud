@@ -14,7 +14,7 @@ After=pod-nc.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/nextcloud
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -43,9 +43,9 @@ ExecStart=/usr/bin/podman run \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	-e NEXTCLOUD_SERVERINFO_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} \
 	--volume ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:Z \
-	--volume nc:/var/www/html:rw \
+	--volume nc-app:/var/www/html:rw \
 	--tmpfs /tmp \
-  docker.io/steffenmalisi/nextcloud:main
+  docker.io/steffenmalisi/nextcloud:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \
 	--cidfile=%t/%n.ctr-id

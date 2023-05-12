@@ -24,8 +24,8 @@ ExecStartPre=/usr/bin/podman pod create \
 	--add-host ${SERVER_DOMAIN}:127.0.0.1 \
 	-p 80:80 \
 	-p 443:443 \
-	-p 9999:9999 \
-	-p 9205:9205 \
+	-p 10.88.0.0:9999:9999 \
+	-p 10.88.0.0:9205:9205 \
 	--replace
 ExecStart=/usr/bin/podman pod start \
 	--pod-id-file %t/pod-nc.pod-id

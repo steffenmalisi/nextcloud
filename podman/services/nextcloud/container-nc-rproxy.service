@@ -14,7 +14,7 @@ After=pod-nc.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/nextcloud
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -27,9 +27,9 @@ ExecStart=/usr/bin/podman run \
 	--name=nc-rproxy \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	--volume ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z \
-	--volume caddy_data:/data \
-	--volume caddy_config:/config \
-	--volume nc:/var/www/html:ro \
+	--volume nc-rproxy-data:/data \
+	--volume nc-rproxy-config:/config \
+	--volume nc-app:/var/www/html:ro \
   docker.io/caddy:alpine
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

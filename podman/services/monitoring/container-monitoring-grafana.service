@@ -14,7 +14,7 @@ After=pod-monitoring.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/monitoring
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -26,7 +26,7 @@ ExecStart=/usr/bin/podman run \
 	-d \
 	--name=monitoring-grafana \
 	-e GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} \
-	--volume grafana:/var/lib/grafana \
+	--volume monitoring-grafana:/var/lib/grafana \
 	--volume ${CONFIG_DIR}/grafana:/etc/grafana:Z \
   docker.io/grafana/grafana:latest
 ExecStop=/usr/bin/podman stop \

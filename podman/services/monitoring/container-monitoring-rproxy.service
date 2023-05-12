@@ -14,7 +14,7 @@ After=pod-monitoring.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/monitoring
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -27,8 +27,8 @@ ExecStart=/usr/bin/podman run \
 	--name=monitoring-rproxy \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	--volume ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z \
-	--volume mon_rproxy_data:/data \
-	--volume mon_rproxy_config:/config \
+	--volume monitoring-rproxy-data:/data \
+	--volume monitoring-rproxy-config:/config \
   docker.io/caddy:alpine
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

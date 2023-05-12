@@ -14,7 +14,7 @@ After=pod-monitoring.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/monitoring
-Restart=always
+Restart=on-failure
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -25,7 +25,7 @@ ExecStart=/usr/bin/podman run \
 	--replace \
 	-d \
 	--name=monitoring-prom \
-	--volume prometheus:/data \
+	--volume monitoring-prom:/data \
 	--volume ${CONFIG_DIR}/prometheus:/etc/prometheus:Z \
   docker.io/prom/prometheus:latest
 ExecStop=/usr/bin/podman stop \

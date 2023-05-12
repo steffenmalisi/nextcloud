@@ -14,7 +14,7 @@ After=pod-nc.service
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/nextcloud
-Restart=always
+Restart=on-failure
 TimeoutStopSec=1860
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -32,7 +32,7 @@ ExecStart=/usr/bin/podman run \
 	-e PGTZ=${TIMEZONE} \
 	--stop-timeout 1800 \
 	--volume nc-db:/var/lib/postgresql/data:rw \
-	--volume nc-db_dump:/mnt/data:rw \
+	--volume nc-db-dump:/mnt/data:rw \
   docker.io/nextcloud/aio-postgresql:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 1800 \
