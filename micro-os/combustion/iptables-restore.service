@@ -1,0 +1,10 @@
+[Unit]
+Description=Service to restore iptable rules from file
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/bin/bash -c 'iptables-restore < /etc/sysconfig/iptables'
+
+[Install]
+WantedBy=default.target

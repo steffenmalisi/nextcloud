@@ -24,6 +24,11 @@ echo "COMBUSTION-INIT: /home /var mounted"
 cp 90-disableipv6.conf /etc/sysctl.d/
 echo "COMBUSTION-INIT: IPv6 disabled"
 
+## Restore iptables from /etc/sysconfig/iptables on startup
+cp iptables /etc/sysconfig/
+cp iptables-restore.service /etc/systemd/system/
+systemctl enable iptables-restore.service
+
 ## Install nfs-kernel-server
 zypper --non-interactive install nfs-kernel-server
 systemctl enable rpcbind.service
