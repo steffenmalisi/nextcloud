@@ -74,7 +74,7 @@ if ! [ -f "$NEXTCLOUD_DATA_DIR/mal1s1-nc.install.done" ]; then
 
   # memories
   php /var/www/html/occ memories:index
-  yes | php /var/www/html/occ memories:video-setup
+  php /var/www/html/occ memories:places-setup
 
   # additional customizations
   #php /var/www/html/occ config:system:set upgrade.disable-web --type=bool --value=true
