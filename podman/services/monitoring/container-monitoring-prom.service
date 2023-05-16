@@ -25,7 +25,7 @@ ExecStart=/usr/bin/podman run \
 	--replace \
 	-d \
 	--name=monitoring-prom \
-	--volume monitoring-prom:/data \
+	--volume monitoring-prom:/prometheus \
 	--volume ${CONFIG_DIR}/prometheus:/etc/prometheus:Z \
   docker.io/prom/prometheus:latest
 ExecStop=/usr/bin/podman stop \
