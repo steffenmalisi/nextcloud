@@ -25,7 +25,7 @@ ExecStart=/usr/bin/podman run \
 	--replace \
 	-d \
 	--name=nc-app \
-	-e POSTGRES_HOST=localhost \
+	-e POSTGRES_HOST=nc-db \
 	-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 	-e POSTGRES_DB=${POSTGRES_DB} \
 	-e POSTGRES_USER=${POSTGRES_USER} \
@@ -35,11 +35,11 @@ ExecStart=/usr/bin/podman run \
 	-e NEXTCLOUD_TRUSTED_DOMAINS=${SERVER_DOMAIN} \
 	-e OVERWRITECLIURL=https://${SERVER_DOMAIN}/ \
 	-e TRUSTED_PROXIES=127.0.0.1 \
-	-e REDIS_HOST=localhost \
+	-e REDIS_HOST=nc-redis \
 	-e REDIS_HOST_PASSWORD=${REDIS_PASSWORD} \
 	-e PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT} \
 	-e PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT} \
-	-e IMAGINARY_HOST=localhost:9001 \
+	-e IMAGINARY_HOST=nc-imaginary:9001 \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	-e NEXTCLOUD_SERVERINFO_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} \
 	--volume ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:Z \

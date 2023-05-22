@@ -19,7 +19,7 @@ https://{$SERVER_DOMAIN}:443 {
 
         route /push/* {
                 uri strip_prefix /push
-                reverse_proxy http://localhost:7867
+                reverse_proxy http://nc-app:7867
         }
 
         # .htaccess / data / config / ... shouldn't be accessible from outside
@@ -39,7 +39,7 @@ https://{$SERVER_DOMAIN}:443 {
         respond @forbidden 404
 
         root * /var/www/html
-        php_fastcgi localhost:9000
+        php_fastcgi nc-app:9000
         file_server
 }
 

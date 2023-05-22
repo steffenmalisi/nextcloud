@@ -5,6 +5,6 @@ datasources:
     type: prometheus
     access: proxy
     uid: 1111111111
-    url: http://localhost:9090
+    url: http://monitoring-prom:9090
     isDefault: true
     editable: false
