@@ -77,7 +77,10 @@ if ! [ -f "$NEXTCLOUD_DATA_DIR/mal1s1-nc.install.done" ]; then
   php /var/www/html/occ memories:places-setup
 
   # additional customizations
-  #php /var/www/html/occ config:system:set upgrade.disable-web --type=bool --value=true
+  php /var/www/html/occ config:system:set upgrade.disable-web --type=bool --value=true
+  # When running in a podman pod, imaginary is called with the local 127.0.0.1 address.
+  # The nextcloud client class prohibits this behaviour as long as allow_local_remote_server is not set to true
+  php /var/www/html/occ config:system:set allow_local_remote_servers --type=bool --value=true
   #php /var/www/html/occ config:system:set trashbin_retention_obligation --value="auto, 30"
   #php /var/www/html/occ config:system:set versions_retention_obligation --value="auto, 30"
   #php /var/www/html/occ config:system:set activity_expire_days --value="30"
