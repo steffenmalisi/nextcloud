@@ -42,7 +42,7 @@ ExecStart=/usr/bin/podman run \
 	-e IMAGINARY_HOST=nc-imaginary:9001 \
 	-e SERVER_DOMAIN=${SERVER_DOMAIN} \
 	-e NEXTCLOUD_SERVERINFO_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} \
-	--volume ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:Z \
+	--volume ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:z \
 	--volume nc-app:/var/www/html:rw \
 	--tmpfs /tmp \
   docker.io/steffenmalisi/nextcloud:latest

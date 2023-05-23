@@ -67,7 +67,7 @@ services:
     container_name: nc
     volumes:
       - nc:/var/www/html:rw
-      - ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:Z
+      - ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:z
       - type: tmpfs # as per recommendation of https://github.com/nextcloud/recognize#tmp
         target: /tmp
     environment:
