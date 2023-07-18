@@ -1,0 +1,16 @@
+[Unit]
+Description=Simple backup service using rsync
+RequiresMountsFor=/var/backup /var/nextcloud_data
+OnSuccess=pod-nc.service
+OnFailure=pod-nc.service
+
+[Service]
+Type=oneshot
+Restart=on-failure
+ExecStartPre=/usr/bin/systemctl stop pod-nc
+ExecStart=/usr/bin/rsync -aq /var/lib/containers/storage/volumes/nc-db-dump /var/backup/nextcloud
+ExecStart=/usr/bin/rsync -aq /var/lib/containers/storage/volumes/nc-app /var/backup/nextcloud
+ExecStart=/usr/bin/rsync -aq /var/nextcloud_data/ncdata /var/backup/nextcloud
+
+[Install]
+WantedBy=default.target

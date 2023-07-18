@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily backup of the system
+
+[Timer]
+OnBootSec=23h 50min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

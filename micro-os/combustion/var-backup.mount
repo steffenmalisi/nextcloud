@@ -1,0 +1,11 @@
+[Unit]
+Description=Mount unit for /var/backup
+
+[Mount]
+What=/dev/disk/by-label/backup1
+Where=/var/backup
+Type=btrfs
+Options=rw
+
+[Install]
+WantedBy=multi-user.target

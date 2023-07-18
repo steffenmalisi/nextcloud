@@ -15,6 +15,9 @@ source .env
 echo "$SYSTEM_HOST_NAME" > /etc/hostname
 echo "COMBUSTION-INIT: hostname $SYSTEM_HOST_NAME set"
 
+# Set maintenance window
+rebootmgrctl set-window 02:00:00 5m
+
 ## Mounts
 mount /home
 mount /var
@@ -43,20 +46,22 @@ echo "/var/share $NFS_SHARE_CIDR(rw,sync,no_subtree_check)" >> /etc/exports
 exportfs -a
 echo "COMBUSTION-INIT: NFS configured"
 
+## Enable backup mount
+mkdir -p /var/backup
+cp var-backup.mount /etc/systemd/system/
+systemctl enable var-backup.mount
+echo "COMBUSTION-INIT: Backup mount enabled"
+
 ## Enable nextlcoud_data mount
 mkdir -p /var/nextcloud_data
 cp var-nextcloud_data.mount /etc/systemd/system/
 systemctl enable var-nextcloud_data.mount
 echo "COMBUSTION-INIT: Nextcloud data mount enabled"
 
-## Remove podman and use docker instead
-#zypper --non-interactive remove podman
-#echo "COMBUSTION-INIT: Podman removed"
-#zypper --non-interactive install docker
-#zypper --non-interactive install docker-compose
-#sed -i 's|DOCKER_OPTS=.*|DOCKER_OPTS="--selinux-enabled"|' /etc/sysconfig/docker # Enable SE Linux
-#systemctl enable docker
-#echo "COMBUSTION-INIT: Docker enabled"
+## Enable simple backup
+cp simple-backup.* /etc/systemd/system/
+systemctl enable simple-backup.timer
+echo "COMBUSTION-INIT: Simple Backup enabled"
 
 ## Install node_exporter
 zypper --non-interactive install golang-github-prometheus-node_exporter
@@ -87,14 +92,6 @@ mkdir -pm700 "/home/$SYSTEM_USER_NAME/.ssh"
 chown "$SYSTEM_USER_NAME:users" -R "/home/$SYSTEM_USER_NAME/.ssh"
 cat id_rsa.pub > "/home/$SYSTEM_USER_NAME/.ssh/authorized_keys"
 echo "COMBUSTION-INIT: $SYSTEM_USER_NAME SSH authorized_keys set"
-
-## Add a new docker user with SSH access
-#useradd -m dkr
-#mkdir -pm700 /home/dkr/.ssh
-#chown dkr:users -R /home/dkr/.ssh
-#cat id_rsa.pub > /home/dkr/.ssh/authorized_keys
-#usermod -a -G docker dkr
-#echo "COMBUSTION-INIT: dkr SSH authorized_keys set"
 
 ## Enable sshd
 systemctl enable sshd.service
