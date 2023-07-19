@@ -2,7 +2,7 @@ name: Build Nextcloud Image
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "images/nextcloud/**"
   workflow_dispatch:
@@ -20,6 +20,7 @@ jobs:
           tools/nextcloud_check_app_compatibility.sh \
             images/nextcloud/Dockerfile \
             "calendar contacts facerecognition memories notify_push previewgenerator recognize tasks twofactor_totp"
+
       - name: Build the Docker image
       - uses: actions/checkout@v3
         run: |
