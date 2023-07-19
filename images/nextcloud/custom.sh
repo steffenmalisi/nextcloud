@@ -34,6 +34,7 @@ function installOrRemoveApp {
 if ! [ -f "$NEXTCLOUD_DATA_DIR/mal1s1-nc.install.done" ]; then
 
   # admin_audit?
+  # See shipped and default enabled apps: https://github.com/nextcloud/server/blob/master/core/shipped.json
   ADDITIONAL_APPS="calendar contacts facerecognition memories notify_push previewgenerator recognize tasks twofactor_totp -circles -contactsinteraction -dashboard -federation -privacy -support -survey_client -user_ldap -user_status -weather_status"
 
   read -ra ADDITIONAL_APPS_ARRAY <<< "$ADDITIONAL_APPS"

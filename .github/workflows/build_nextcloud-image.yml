@@ -21,7 +21,7 @@ jobs:
         run: |
           tools/nextcloud_check_app_compatibility.sh \
             images/nextcloud/Dockerfile \
-            "calendar contacts facerecognition memories notify_push previewgenerator recognize tasks twofactor_totp"
+            "calendar contacts facerecognition memories notify_push previewgenerator recognize tasks"
 
       - name: Build the Docker image
         run: |
