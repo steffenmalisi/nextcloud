@@ -14,7 +14,7 @@ jobs:
     name: Push Nextcloud image to Docker Hub
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
