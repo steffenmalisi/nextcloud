@@ -11,19 +11,17 @@ env:
   IMAGE_NAME: "nextcloud"
 
 jobs:
-  check:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Check Nextcloud app compatibilty
+      - uses: actions/checkout@v3
         run: |
           tools/nextcloud_check_app_compatibility.sh \
             images/nextcloud/Dockerfile \
             "calendar contacts facerecognition memories notify_push previewgenerator recognize tasks twofactor_totp"
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: |
-        cd images/nextcloud
-        docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:$(date +%s)
+      - name: Build the Docker image
+      - uses: actions/checkout@v3
+        run: |
+          cd images/nextcloud
+          docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:$(date +%s)
