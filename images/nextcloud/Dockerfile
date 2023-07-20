@@ -1,4 +1,4 @@
-FROM nextcloud:27.0.0-fpm
+FROM nextcloud:27.0.1-fpm
 
 # see https://github.com/nextcloud/docker/blob/master/.examples/dockerfiles/cron/fpm/Dockerfile
 # see https://github.com/matiasdelellis/facerecognition/wiki/Docker
