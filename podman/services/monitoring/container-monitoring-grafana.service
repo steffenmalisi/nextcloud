@@ -28,6 +28,7 @@ ExecStart=/usr/bin/podman run \
 	-e GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD} \
 	--volume monitoring-grafana:/var/lib/grafana \
 	--volume ${CONFIG_DIR}/grafana:/etc/grafana:Z \
+	--label "io.containers.autoupdate=registry" \
   docker.io/grafana/grafana:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

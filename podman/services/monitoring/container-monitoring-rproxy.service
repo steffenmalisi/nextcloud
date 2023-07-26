@@ -29,6 +29,7 @@ ExecStart=/usr/bin/podman run \
 	--volume ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z \
 	--volume monitoring-rproxy-data:/data \
 	--volume monitoring-rproxy-config:/config \
+	--label "io.containers.autoupdate=registry" \
   docker.io/caddy:alpine
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

@@ -30,6 +30,7 @@ ExecStart=/usr/bin/podman run \
 	-e NEXTCLOUD_TIMEOUT=5s \
 	-e NEXTCLOUD_AUTH_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} \
 	-e NEXTCLOUD_TLS_SKIP_VERIFY=true \
+	--label "io.containers.autoupdate=registry" \
   docker.io/xperimental/nextcloud-exporter:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

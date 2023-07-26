@@ -63,6 +63,9 @@ cp simple-backup.* /etc/systemd/system/
 systemctl enable simple-backup.timer
 echo "COMBUSTION-INIT: Simple Backup enabled"
 
+## Enable podman auto update
+systemctl enable podman-auto-update.timer
+
 ## Install node_exporter
 zypper --non-interactive install golang-github-prometheus-node_exporter
 systemctl enable prometheus-node_exporter

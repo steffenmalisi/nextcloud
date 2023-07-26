@@ -15,6 +15,7 @@ After=pod-nc.service
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=/etc/sysconfig/nextcloud
 Restart=on-failure
+TimeoutStartSec=120
 TimeoutStopSec=70
 ExecStart=/usr/bin/podman run \
 	--cidfile=%t/%n.ctr-id \
@@ -45,6 +46,7 @@ ExecStart=/usr/bin/podman run \
 	--volume ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:z \
 	--volume nc-app:/var/www/html:rw \
 	--tmpfs /tmp \
+	--label "io.containers.autoupdate=registry" \
   docker.io/steffenmalisi/nextcloud:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

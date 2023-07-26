@@ -27,6 +27,7 @@ ExecStart=/usr/bin/podman run \
 	--name=monitoring-prom \
 	--volume monitoring-prom:/prometheus \
 	--volume ${CONFIG_DIR}/prometheus:/etc/prometheus:Z \
+	--label "io.containers.autoupdate=registry" \
   docker.io/prom/prometheus:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \

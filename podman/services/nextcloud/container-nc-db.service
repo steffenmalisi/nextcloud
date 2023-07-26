@@ -33,6 +33,7 @@ ExecStart=/usr/bin/podman run \
 	--stop-timeout 1800 \
 	--volume nc-db:/var/lib/postgresql/data:rw \
 	--volume nc-db-dump:/mnt/data:rw \
+	--label "io.containers.autoupdate=registry" \
   docker.io/nextcloud/aio-postgresql:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 1800 \

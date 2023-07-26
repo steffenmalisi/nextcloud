@@ -28,6 +28,7 @@ ExecStart=/usr/bin/podman run \
 	-e REDIS_HOST_PASSWORD=${REDIS_PASSWORD} \
 	-e TZ=${TIMEZONE} \
 	--volume nc-redis:/data:rw \
+	--label "io.containers.autoupdate=registry" \
   docker.io/nextcloud/aio-redis:latest
 ExecStop=/usr/bin/podman stop \
 	--ignore -t 10 \
