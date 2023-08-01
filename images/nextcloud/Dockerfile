@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     gnupg2 \
     unzip \
     libbz2-dev \
-    netcat \
+    netcat-openbsd \
   && rm -rf /var/lib/apt/lists/* \
   ; \
   mkdir /var/log/supervisord /var/run/supervisord; \
