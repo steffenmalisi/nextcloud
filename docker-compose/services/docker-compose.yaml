@@ -4,7 +4,7 @@ services:
   caddy:
     image: caddy:alpine
     restart: unless-stopped
-    container_name: caddy
+    container_name: nc-rproxy
     ports:
       - 443:443    #nextcloud
       - 80:80      #nextcloud
@@ -12,9 +12,9 @@ services:
       - 9090:9090  #prometheus
     volumes:
       - ${CONFIG_DIR}/caddy/Caddyfile:/etc/caddy/Caddyfile:Z
-      - caddy_data:/data
-      - caddy_config:/config
-      - nc:/var/www/html:ro
+      - nc-rproxy-data:/data
+      - nc-rproxy-config:/config
+      - nc-app:/var/www/html:ro
     environment:
       - SERVER_DOMAIN=${SERVER_DOMAIN}
     networks:
@@ -25,7 +25,7 @@ services:
     container_name: nc-db
     volumes:
       - nc-db:/var/lib/postgresql/data:rw
-      - nc-db_dump:/mnt/data:rw
+      - nc-db-dump:/mnt/data:rw
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
@@ -54,22 +54,23 @@ services:
     container_name: nc-imaginary
     environment:
       - TZ=${TIMEZONE}
+      - PORT=9001
     restart: unless-stopped
     networks:
       - nc
 
-  nc:
+  nc-app:
     depends_on:
       - nc-db
       - nc-redis
       - nc-imaginary
     build: ../../images/nextcloud
-    container_name: nc
+    container_name: nc-app
     volumes:
-      - nc:/var/www/html:rw
+      - nc-app:/var/www/html:rw
       - ${NEXTCLOUD_DATA_DIR}:/mnt/ncdata:z
       - type: tmpfs # as per recommendation of https://github.com/nextcloud/recognize#tmp
-        target: /tmp
+        target: /tmp:exec
     environment:
       - POSTGRES_HOST=nc-db
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -85,7 +86,7 @@ services:
       - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
       - PHP_UPLOAD_LIMIT=${PHP_UPLOAD_LIMIT}
       - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT}
-      - IMAGINARY_HOST=nc-imaginary # Custom, used to setup imaginary
+      - IMAGINARY_HOST=nc-imaginary:9001 # Custom, used to setup imaginary
       - SERVER_DOMAIN=${SERVER_DOMAIN} # Custom, used for notify_push
       - NEXTCLOUD_SERVERINFO_TOKEN=${NEXTCLOUD_SERVERINFO_TOKEN} # Custom, used to set token for nextcloud-exporter
     restart: unless-stopped
@@ -98,7 +99,7 @@ services:
       - nc
     image: xperimental/nextcloud-exporter
     restart: unless-stopped
-    container_name: nc-exporter
+    container_name: nc-metrics
     environment:
       - NEXTCLOUD_SERVER=https://${SERVER_DOMAIN}
       - NEXTCLOUD_LISTEN_ADDRESS=:9205
@@ -116,9 +117,9 @@ services:
       - nc-exporter
     image: prom/prometheus
     restart: unless-stopped
-    container_name: prometheus
+    container_name: monitoring-prometheus
     volumes:
-      - prometheus:/prometheus
+      - monitoring-prometheus:/prometheus
       - ${CONFIG_DIR}/prometheus:/etc/prometheus:Z
     networks:
       - nc
@@ -130,25 +131,24 @@ services:
       - prometheus
     image: grafana/grafana:latest
     restart: unless-stopped
-    container_name: grafana
+    container_name: monitoring-grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
-      - grafana:/var/lib/grafana
+      - monitoring-grafana:/var/lib/grafana
       - ${CONFIG_DIR}/grafana:/etc/grafana:Z
     networks:
       - nc
 
 volumes:
-  nc-apache:
   nc-db:
-  nc-db_dump:
-  nc:
+  nc-db-dump:
+  nc-app:
   nc-redis:
-  caddy_data:
-  caddy_config:
-  prometheus:
-  grafana:
+  nc-rproxy-data:
+  nc-rproxy-config:
+  monitoring-prometheus:
+  monitoring-grafana:
 
 networks:
   nc:
