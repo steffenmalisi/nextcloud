@@ -1,47 +1,48 @@
+FROM nextcloud:27.0.1-fpm AS builder
+# libx11-dev has to be installed before dlib
+RUN apt-get update && apt-get install -y cmake git libx11-dev
+RUN git clone https://github.com/davisking/dlib.git \
+  && cd dlib/dlib \
+  && mkdir build \
+  && cd build \
+  && cmake -DBUILD_SHARED_LIBS=ON .. \
+  && make \
+  && make install
+RUN apt-get install -y libopenblas-dev ffmpeg
+RUN git clone https://github.com/goodspb/pdlib.git \
+  && cd pdlib \
+  && phpize \
+  && ./configure --enable-debug \
+  && make \
+  && make install
+RUN echo "extension=pdlib.so" > /usr/local/etc/php/conf.d/pdlib.ini
+RUN apt-get install -y libbz2-dev
+RUN docker-php-ext-install bz2
+RUN apt-get install -y wget
+RUN git clone https://github.com/matiasdelellis/pdlib-min-test-suite.git \
+    && cd pdlib-min-test-suite \
+    && make
+
 FROM nextcloud:27.0.1-fpm
-
-# see https://github.com/nextcloud/docker/blob/master/.examples/dockerfiles/cron/fpm/Dockerfile
-# see https://github.com/matiasdelellis/facerecognition/wiki/Docker
-
 RUN apt-get update && apt-get install -y \
     supervisor \
     ffmpeg \
-    wget \
-    gnupg2 \
-    unzip \
-    libbz2-dev \
     netcat-openbsd \
   && rm -rf /var/lib/apt/lists/* \
   ; \
-  mkdir /var/log/supervisord /var/run/supervisord; \
-  mkdir /mnt/ncdata && chown www-data:www-data /mnt/ncdata; \
+  mkdir /var/log/supervisord /var/run/supervisord \
+  ; \
+  mkdir /mnt/ncdata \
+    && chown www-data:www-data /mnt/ncdata \
+  ; \
   echo '*/30 *  *  *  * php -f /var/www/html/occ face:background_job -t 900' >> /var/spool/cron/crontabs/www-data; \
-  echo '*/10 *  *  *  * php -f /var/www/html/occ preview:pre-generate' >> /var/spool/cron/crontabs/www-data
-
-# Enable repo and install dlib
-RUN echo "deb https://repo.delellis.com.ar bullseye bullseye" > /etc/apt/sources.list.d/20-pdlib.list \
-  && wget -qO - https://repo.delellis.com.ar/repo.gpg.key | apt-key add -
-RUN apt update \
-  && apt install -y libdlib-dev
-
-# Install pdlib extension
-RUN wget https://github.com/goodspb/pdlib/archive/master.zip \
-  && mkdir -p /usr/src/php/ext/ \
-  && unzip -d /usr/src/php/ext/ master.zip \
-  && rm master.zip
-
-# Install php extensions needed for facerecognition
-RUN docker-php-ext-install \
-  pdlib-master \
-  bz2 \
-  ;
-
-# Increase memory limits
-RUN echo memory_limit=1024M > /usr/local/etc/php/conf.d/memory-limit.ini
-
+  echo '*/10 *  *  *  * php -f /var/www/html/occ preview:pre-generate' >> /var/spool/cron/crontabs/www-data \
+  ; \
+  echo "extension=pdlib.so" > /usr/local/etc/php/conf.d/pdlib.ini; \
+  echo "extension=bz2.so" > /usr/local/etc/php/conf.d/bz2.ini
+COPY --from=builder /usr/local/lib/libdlib.so* /usr/local/lib
+COPY --from=builder /usr/local/lib/php/extensions/no-debug-non-zts-20220829 /usr/local/lib/php/extensions/no-debug-non-zts-20220829
 COPY *.sh supervisord.conf /
-
 ENV NEXTCLOUD_UPDATE=1
-
 ENTRYPOINT [ "/start.sh" ]
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf"]
