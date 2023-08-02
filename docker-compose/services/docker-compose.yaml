@@ -60,10 +60,6 @@ services:
       - nc
 
   nc-app:
-    depends_on:
-      - nc-db
-      - nc-redis
-      - nc-imaginary
     build: ../../images/nextcloud
     container_name: nc-app
     volumes:
@@ -94,9 +90,6 @@ services:
       - nc
 
   nc-exporter:
-    depends_on:
-      - caddy
-      - nc
     image: xperimental/nextcloud-exporter
     restart: unless-stopped
     container_name: nc-metrics
@@ -111,10 +104,7 @@ services:
     extra_hosts:
       - "${SERVER_DOMAIN}:host-gateway" # Just in case a non public domain is used
 
-  prometheus:
-    depends_on:
-      - caddy
-      - nc-exporter
+  monitoring-prometheus:
     image: prom/prometheus
     restart: unless-stopped
     container_name: monitoring-prometheus
@@ -126,9 +116,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  grafana:
-    depends_on:
-      - prometheus
+  monitoring-grafana:
     image: grafana/grafana:latest
     restart: unless-stopped
     container_name: monitoring-grafana
