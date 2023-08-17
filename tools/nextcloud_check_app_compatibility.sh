@@ -3,7 +3,7 @@ set -eu
 
 DOCKERFILE=$1
 APPS=$2
-PLATFORM=$(grep 'FROM nextcloud' "$DOCKERFILE"  | awk -F ':' '{print $2}' | awk -F '-' '{print $1}')
+PLATFORM=$(grep -m 1 'FROM nextcloud' "$DOCKERFILE"  | awk -F ':' '{print $2}' | awk -F '-' '{print $1}')
 APP_IDS=$(curl -s https://apps.nextcloud.com/api/v1/platform/"$PLATFORM"/apps.json | jq -r '.[].id')
 COMPATIBLE=true
 
