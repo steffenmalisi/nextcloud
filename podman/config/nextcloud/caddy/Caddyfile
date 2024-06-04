@@ -15,8 +15,7 @@ https://{$SERVER_DOMAIN}:443 {
         # Set recommended Security Response Headers
         # https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
         header {
-                Cross-Origin-Embedder-Policy: "require-corp"
-                Cross-Origin-Opener-Policy: "same-origin"
+                Cross-Origin-Opener-Policy "same-origin"
                 Cross-Origin-Resource-Policy "same-site"
                 Permissions-Policy "interest-cohort=()"
                 Referrer-Policy "no-referrer"
@@ -30,6 +29,11 @@ https://{$SERVER_DOMAIN}:443 {
                 -server
                 -x-powered-by
                 -x-request-id
+        }
+
+        route {
+                header                  Cross-Origin-Embedder-Policy "require-corp"
+                header /apps/memories*  Cross-Origin-Embedder-Policy "credentialless"
         }
 
         route /push/* {
