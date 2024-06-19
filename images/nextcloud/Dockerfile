@@ -1,4 +1,4 @@
-FROM nextcloud:29.0.1-fpm AS builder
+FROM nextcloud:29.0.2-fpm AS builder
 # libx11-dev has to be installed before dlib
 RUN apt-get update && apt-get install -y cmake git libx11-dev
 RUN git clone https://github.com/davisking/dlib.git \
@@ -23,7 +23,7 @@ RUN git clone https://github.com/matiasdelellis/pdlib-min-test-suite.git \
     && cd pdlib-min-test-suite \
     && make
 
-FROM nextcloud:29.0.1-fpm
+FROM nextcloud:29.0.2-fpm
 RUN apt-get update && apt-get install -y \
     supervisor \
     ffmpeg \
