@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     ffmpeg \
     netcat-openbsd \
+    libimage-exiftool-perl \
   && rm -rf /var/lib/apt/lists/* \
   ; \
   mkdir /var/log/supervisord /var/run/supervisord \
