@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
   echo "extension=pdlib.so" > /usr/local/etc/php/conf.d/pdlib.ini; \
   echo "extension=bz2.so" > /usr/local/etc/php/conf.d/bz2.ini
 COPY --from=builder /usr/local/lib/libdlib.so* /usr/local/lib
-COPY --from=builder /usr/local/lib/php/extensions/no-debug-non-zts-20220829 /usr/local/lib/php/extensions/no-debug-non-zts-20220829
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY *.sh supervisord.conf /
 ENV NEXTCLOUD_UPDATE=1
 ENTRYPOINT [ "/start.sh" ]
