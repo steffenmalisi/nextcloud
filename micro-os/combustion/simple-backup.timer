@@ -4,7 +4,7 @@ Description=Daily backup of the system
 [Timer]
 OnCalendar=daily
 RandomizedDelaySec=1h
-Persistent=true
+Persistent=false
 
 [Install]
 WantedBy=timers.target‚
