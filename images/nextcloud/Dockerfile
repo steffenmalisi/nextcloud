@@ -1,37 +1,36 @@
-FROM nextcloud:33.0.8-fpm AS builder
-# libx11-dev has to be installed before dlib
-RUN apt-get update && apt-get install -y cmake git libx11-dev
-RUN git clone https://github.com/davisking/dlib.git \
-  && cd dlib/dlib \
-  && mkdir build \
-  && cd build \
-  && cmake -DBUILD_SHARED_LIBS=ON .. \
-  && make \
-  && make install
-RUN apt-get install -y libopenblas-dev ffmpeg
-RUN git clone https://github.com/goodspb/pdlib.git \
-  && cd pdlib \
-  && phpize \
-  && ./configure --enable-debug \
-  && make \
-  && make install
-RUN echo "extension=pdlib.so" > /usr/local/etc/php/conf.d/pdlib.ini
-RUN apt-get install -y libbz2-dev
-RUN docker-php-ext-install bz2
-RUN apt-get install -y wget
-RUN git clone https://github.com/matiasdelellis/pdlib-min-test-suite.git \
-    && cd pdlib-min-test-suite \
-    && make
+# Builder image to compile php extensions
+# Only adds dependecies required for building those extensions
+# Typically, those dependencies are not required for running Nextcloud, so we use a multi-stage build to keep the final image small.
+FROM nextcloud:34.0.5-fpm AS builder
 
-FROM nextcloud:33.0.8-fpm
-RUN apt-get update && apt-get install -y \
-    supervisor \
-    ffmpeg \
-    netcat-openbsd \
-    libimage-exiftool-perl \
-  && rm -rf /var/lib/apt/lists/* \
-  ; \
-  mkdir /var/log/supervisord /var/run/supervisord \
+RUN set -ex; \
+    \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        libbz2-dev
+
+RUN docker-php-ext-install bz2
+
+
+# Final image
+# Only installs the dependencies required for running Nextcloud, and copies the compiled extensions from the builder image.
+FROM nextcloud:34.0.5-fpm
+
+COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+
+RUN set -ex; \
+    \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        ffmpeg \    
+        libimage-exiftool-perl \
+        netcat-openbsd \
+        supervisor \
+    ; \
+    rm -rf /var/lib/apt/lists/*
+
+
+RUN mkdir /var/log/supervisord /var/run/supervisord \
   ; \
   mkdir /mnt/ncdata \
     && chown www-data:www-data /mnt/ncdata \
@@ -39,11 +38,13 @@ RUN apt-get update && apt-get install -y \
   echo '*/30 *  *  *  * php -f /var/www/html/occ face:background_job -t 900' >> /var/spool/cron/crontabs/www-data; \
   echo '*/10 *  *  *  * php -f /var/www/html/occ preview:pre-generate' >> /var/spool/cron/crontabs/www-data \
   ; \
-  echo "extension=pdlib.so" > /usr/local/etc/php/conf.d/pdlib.ini; \
   echo "extension=bz2.so" > /usr/local/etc/php/conf.d/bz2.ini
-COPY --from=builder /usr/local/lib/libdlib.so* /usr/local/lib
-COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+
+
 COPY *.sh supervisord.conf /
+
 ENV NEXTCLOUD_UPDATE=1
+
 ENTRYPOINT [ "/start.sh" ]
+
 CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf"]
