@@ -1,7 +1,7 @@
 # Builder image to compile php extensions
 # Only adds dependecies required for building those extensions
 # Typically, those dependencies are not required for running Nextcloud, so we use a multi-stage build to keep the final image small.
-FROM nextcloud:34.0.5-fpm AS builder
+FROM nextcloud:35.0.2-fpm AS builder
 
 RUN set -ex; \
     \
@@ -14,7 +14,7 @@ RUN docker-php-ext-install bz2
 
 # Final image
 # Only installs the dependencies required for running Nextcloud, and copies the compiled extensions from the builder image.
-FROM nextcloud:34.0.5-fpm
+FROM nextcloud:35.0.2-fpm
 
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 
